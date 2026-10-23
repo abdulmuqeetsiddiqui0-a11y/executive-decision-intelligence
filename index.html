@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive Decision Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+:root{--bg:#eef2f6;--panel:#fff;--ink:#1b2a3a;--mute:#5d6b7a;--line:#d8e0e8;--accent:#3d4fd1;--risk:#d9363e;--warn:#d98a1c;--ok:#1f8f7e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0}
+header{padding:28px 24px 8px;max-width:1200px;margin:auto}
+h1{font-size:30px}
+header p{color:var(--mute);margin:6px 0 0;max-width:74ch}
+main{max-width:1200px;margin:auto;padding:16px 24px 48px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.kpi b{display:block;font-size:26px;font-weight:600}
+.kpi span{color:var(--mute);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-bottom:16px}
+h2{font-size:19px;margin-bottom:6px}
+.sm{color:var(--mute);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 16px;font:inherit;font-weight:500;cursor:pointer;color:var(--ink)}
+.tabs button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.ins{padding:10px 0;border-bottom:1px solid var(--line)}
+.ins:last-child{border:0}
+.ev{display:inline-block;background:#e8ecfb;color:#2a3799;border-radius:6px;padding:0 8px;font-size:12px;margin-top:4px}
+.tbl{overflow-x:auto;max-height:560px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--mute);padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:#fff}
+td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.bar{display:inline-block;width:80px;height:8px;background:#e5eaf0;border-radius:4px;vertical-align:middle;margin-right:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.pill{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.p-up{background:#e1f4f0;color:#13665a}.p-hold{background:#fdf1dc;color:#8a5608}.p-down{background:#fbe4e5;color:#992027}.p-info{background:#eceff3;color:#4a5866}
+.up{color:var(--ok)}.down{color:var(--risk)}
+.cb{display:grid;grid-template-columns:170px 1fr 70px;gap:8px;align-items:center;margin:7px 0;font-size:13px}
+.cb .t{position:relative;height:12px;background:#f0f3f7;border-radius:6px}
+.cb .t i{position:absolute;top:0;height:100%;border-radius:4px}
+.cb .t:after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#8795a3}
+.q button{border:1px solid var(--accent);color:var(--accent);background:#fff;border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;margin:0 6px 6px 0}
+.q button:hover,.q button[aria-pressed=true]{background:var(--accent);color:#fff}
+.ans{background:#f6f8fb;border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:60px}
+.ans p{margin:0 0 8px}.ans p:last-child{margin:0}
+svg{width:100%;height:auto;display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.cb{grid-template-columns:120px 1fr 60px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Executive Decision Intelligence</h1>
+  <p>Synthetic demo. Tracks 25 departmental KPIs against financial outcomes, finds which ones actually move the numbers, separates real drivers from KPIs that only rise with the trend, and writes an evidence-based briefing.</p>
+</header>
+<main>
+  <div class="tabs" id="tabs" role="group" aria-label="Financial outcome"></div>
+  <section class="kpis" aria-label="Summary">
+    <div class="kpi"><b id="k1"></b><span id="k1l"></span></div>
+    <div class="kpi"><b id="k2"></b><span>KPIs tracked across 7 departments</span></div>
+    <div class="kpi"><b id="k3"></b><span>KPIs that truly drive this outcome</span></div>
+    <div class="kpi"><b id="k4"></b><span>Misleading KPIs (trend only)</span></div>
+  </section>
+
+  <div class="grid">
+    <section class="card"><h2 id="ch">Outcome</h2><p class="sm" style="margin:0">Last 4 years.</p><div id="chart"></div></section>
+    <section class="card"><h2>Executive briefing</h2><p class="sm" style="margin:0">Generated only from the computed evidence below.</p><div id="brief"></div></section>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>What moved the number last month</h2>
+      <p class="sm" style="margin:0 0 8px">Estimated contribution of each driver to last month's change (outcome units).</p>
+      <div id="contrib"></div>
+    </section>
+    <section class="card">
+      <h2>Ask the system</h2>
+      <p class="sm" style="margin:0 0 8px">Pick a question. Answers use the same evidence as the dashboard.</p>
+      <div class="q" id="q"></div>
+      <div class="ans" id="ans" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Which KPIs explain the outcome?</h2>
+    <p class="sm" style="margin:0">Ranked by how closely a KPI's monthly changes match changes in the outcome, at its best time lag. Level correlation is shown to expose KPIs that only look important because both rise over time.</p>
+    <div class="chips" id="chips" role="group" aria-label="Filter KPIs"></div>
+    <div class="tbl"><table>
+      <thead><tr><th>KPI</th><th>Department</th><th>Link to changes</th><th>Effect</th><th>Time lag</th><th>Level correlation</th><th>Verdict</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>How it works</h2>
+    <p class="sm" style="margin:0">Each KPI's month-to-month change is correlated with the outcome's change at lags of 0 to 2 months, which removes shared trends. KPIs with |r| of 0.5 or more are drivers, and the strongest are combined in a regression to split last month's change into contributions. In production, an LLM would write the briefing and answer questions from these computed numbers only, citing the evidence for every claim. Correlation is not proof of cause, so major decisions should be confirmed with experiments.</p>
+  </section>
+</main>
+
+<script>
+// ---- LOGIC START
+let sd = 11; const rnd = () => (sd = (sd * 1664525 + 1013904223) % 4294967296) / 4294967296;
+const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+const T = 48, B = 2, NN = T + B;
+// name, department, mean, scale, trend (in std units over the period), decimals, prefix, suffix
+const KPI = [
+ ["Qualified leads","Sales",1200,150,.4,0,"",""],["Win rate","Sales",24,3,.2,1,"","%"],["Average deal size","Sales",8.4,1,.3,1,"$","k"],["Pipeline coverage","Sales",3.1,.4,.1,1,"","x"],
+ ["Ad spend","Marketing",310,40,5,0,"$","k"],["Website traffic","Marketing",480,50,5,0,"","k"],["Conversion rate","Marketing",2.6,.3,.1,2,"","%"],["Brand search volume","Marketing",92,10,5,0,"","k"],
+ ["On-time delivery","Operations",91,3,-.5,1,"","%"],["Order cycle time","Operations",3.4,.5,.3,1,"","d"],["Inventory turnover","Operations",6.2,.6,0,1,"","x"],["Defect rate","Operations",1.8,.3,.3,2,"","%"],
+ ["First response time","Support",5.5,1.2,.6,1,"","h"],["CSAT score","Support",4.2,.2,-.5,2,"",""],["Ticket backlog","Support",420,60,.6,0,"",""],["Refund rate","Support",3.2,.5,.4,1,"","%"],
+ ["Weekly active users","Product",86,8,.8,0,"","k"],["Feature adoption","Product",41,4,.3,0,"","%"],["App crash rate","Product",.9,.2,0,2,"","%"],
+ ["Employee attrition","HR",14,2.5,.9,1,"","%"],["Overtime hours per week","HR",6.5,1.5,.5,1,"","h"],["Open positions","HR",28,5,5,0,"",""],["Employee NPS","HR",32,6,-.4,0,"",""],
+ ["Days sales outstanding","Finance",47,5,.4,0,"","d"],["Discount rate","Finance",9,1.5,.5,1,"","%"]
+].map(([n, d, m, s, tr, dp, pre, suf]) => {
+  let e = 0; const z = Array.from({length: NN}, (_, i) => { e = .4 * e + .92 * gauss(); return tr * i / (NN - 1) + e; });
+  return {n, d, m, s, dp, pre, suf, z, x: z.map(v => m + s * v)};
+});
+const KM = Object.fromEntries(KPI.map(k => [k.n, k]));
+const OUT = [
+ {key:"Revenue", unit:v => "$" + v.toFixed(2) + "M", base:4.2, sc:.25, g:12, dr:[["Qualified leads",1,1.3],["Win rate",0,1.1],["Average deal size",0,.9],["Refund rate",0,-.6]]},
+ {key:"Gross margin", unit:v => v.toFixed(1) + "%", base:38, sc:.6, g:7, dr:[["Discount rate",0,-1.3],["Defect rate",0,-1],["Inventory turnover",1,.8],["Overtime hours per week",0,-.5]]},
+ {key:"Operating profit", unit:v => "$" + v.toFixed(2) + "M", base:.62, sc:.09, g:10, dr:[["Win rate",0,.8],["Discount rate",0,-1.2],["Ticket backlog",1,-.9],["Employee attrition",2,-.7]]}
+];
+OUT.forEach(o => { o.y = Array.from({length: NN}, (_, i) => i < B ? null : o.base + o.sc * (o.dr.reduce((t, [n, l, b]) => t + b * KM[n].z[i - l], 0) + o.g * i / (NN - 1) + .2 * gauss())); });
+const mean = a => a.reduce((t, v) => t + v, 0) / a.length;
+const sdev = a => { const m = mean(a); return Math.sqrt(a.reduce((t, v) => t + (v - m) ** 2, 0) / a.length) || 1; };
+const corr = (a, b) => { const ma = mean(a), mb = mean(b); let n = 0; for (let i = 0; i < a.length; i++) n += (a[i] - ma) * (b[i] - mb); return n / (a.length * sdev(a) * sdev(b)); };
+const df = a => a.map((v, i) => i ? v - a[i - 1] : null);
+function solve(A, b) { const n = b.length; for (let i = 0; i < n; i++) { let p = i; for (let r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[p][i])) p = r; [A[i], A[p]] = [A[p], A[i]]; [b[i], b[p]] = [b[p], b[i]];
+  for (let r = i + 1; r < n; r++) { const f = A[r][i] / A[i][i]; for (let c = i; c < n; c++) A[r][c] -= f * A[i][c]; b[r] -= f * b[i]; } }
+  const x = Array(n).fill(0); for (let i = n - 1; i >= 0; i--) { let s = b[i]; for (let c = i + 1; c < n; c++) s -= A[i][c] * x[c]; x[i] = s / A[i][i]; } return x; }
+function analyze(o) {
+  const dy = df(o.y.map(v => v === null ? 0 : v)), idx = Array.from({length: NN - B - 1}, (_, k) => k + B + 1), ys = idx.map(i => dy[i]);
+  const rows = KPI.map(k => {
+    const dx = df(k.x); let best = {r: 0, lag: 0};
+    for (let l = 0; l <= 2; l++) { const r = corr(idx.map(i => dx[i - l]), ys); if (Math.abs(r) > Math.abs(best.r)) best = {r, lag: l}; }
+    const rl = corr(k.x.slice(B), o.y.slice(B)), a = Math.abs(best.r);
+    const st = a >= .5 ? "Driver" : Math.abs(rl) >= .7 ? "Misleading" : a >= .35 ? "Possible" : "No clear link";
+    return {k, dx, r: best.r, lag: best.lag, rl, st};
+  }).sort((p, q) => Math.abs(q.r) - Math.abs(p.r));
+  let pick = rows.filter(x => x.st === "Driver").slice(0, 6); if (pick.length < 3) pick = rows.slice(0, 3);
+  const cols = pick.map(p => { const v = idx.map(i => p.dx[i - p.lag]), m = mean(v), s = sdev(v); return {p, m, s, z: v.map(t => (t - m) / s)}; });
+  const my = mean(ys), yc = ys.map(v => v - my), n = ys.length, K = cols.length;
+  const A = cols.map((a, i) => cols.map((b, j) => a.z.reduce((t, v, q) => t + v * b.z[q], 0) + (i === j ? .5 : 0))), rhs = cols.map(a => a.z.reduce((t, v, q) => t + v * yc[q], 0));
+  const beta = solve(A, rhs), fit = ys.map((_, q) => cols.reduce((t, c, j) => t + beta[j] * c.z[q], 0));
+  const r2 = 1 - yc.reduce((t, v, q) => t + (v - fit[q]) ** 2, 0) / yc.reduce((t, v) => t + v * v, 0);
+  const last = n - 1, contrib = cols.map((c, j) => ({p: c.p, v: beta[j] * c.z[last], beta: beta[j]}));
+  const resid = ys[last] - my - contrib.reduce((t, c) => t + c.v, 0);
+  const warn = cols.map((c, j) => ({p: c.p, beta: beta[j], v: c.p.lag >= 1 ? beta[j] * (c.p.dx[NN - c.p.lag] - c.m) / c.s : null})).filter(w => w.v !== null);
+  o.res = {rows, contrib, resid, trend: my, r2, warn, dyLast: ys[last], n};
+}
+OUT.forEach(analyze);
+// ---- LOGIC END
+
+const $ = id => document.getElementById(id);
+const REC = {"Qualified leads":"Protect lead generation next month with targeted campaigns on the best converting segments.","Win rate":"Review lost deals and coach the teams with the lowest win rate.","Average deal size":"Check discounting and bundle offers on larger accounts.","Weekly active users":"Launch re-engagement campaigns for users who dropped off.","On-time delivery":"Fix the delivery bottlenecks before they reach customers.","Refund rate":"Trace refunds to the top three product or service causes.","Discount rate":"Tighten discount approvals and set limits by deal size.","Defect rate":"Target quality checks at the products with the most defects.","Inventory turnover":"Cut slow stock and rebalance inventory to fast sellers.","Overtime hours per week":"Add shifts or hire temporary staff where overtime keeps climbing.","Order cycle time":"Map the order process and remove the slowest handoff.","Ticket backlog":"Staff support for peak days and automate repeat tickets.","Employee attrition":"Run stay interviews in teams with the highest exits.","Days sales outstanding":"Chase overdue invoices and tighten credit terms."};
+let oi = 0, flt = "All", qi = -1;
+const O = () => OUT[oi], R = () => O().res;
+const sg = (v, f) => (v >= 0 ? "+" : "-") + f(Math.abs(v));
+const ch = k => { const x = k.x, a = x[NN - 2], b = x[NN - 1]; return (b - a) / a * 100; };
+const fx = (k, v) => k.pre + v.toFixed(k.dp) + k.suf;
+const monthLab = i => new Date(2026, 9 - (NN - 1 - i), 1).toLocaleString("en", {month: "short", year: "2-digit"});
+const drv = () => R().rows.filter(x => x.st === "Driver");
+const mis = () => R().rows.filter(x => x.st === "Misleading");
+
+function tabs() { $("tabs").innerHTML = OUT.map((o, i) => `<button aria-pressed="${i === oi}" data-i="${i}">${o.key}</button>`).join(""); }
+function summary() {
+  const o = O(), y = o.y, c = (y[NN - 1] - y[NN - 2]) / y[NN - 2] * 100;
+  $("k1").innerHTML = `${o.unit(y[NN - 1])} <span class="sm ${c >= 0 ? "up" : "down"}">${c >= 0 ? "+" : ""}${c.toFixed(1)}%</span>`;
+  $("k1l").textContent = o.key + " last month, change vs previous month";
+  $("k2").textContent = KPI.length; $("k3").textContent = drv().length; $("k4").textContent = mis().length;
+  $("ch").textContent = o.key + " over time";
+  const v = y.slice(B), lo = Math.min(...v), hi = Math.max(...v), W = 520, H = 190, P = 14;
+  const X = i => P + i / (T - 1) * (W - 2 * P), Y = a => P + (hi - a) / (hi - lo) * (H - 2 * P - 14);
+  $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.key} for the last 4 years"><polyline fill="none" stroke="#3d4fd1" stroke-width="2.4" points="${v.map((a, i) => X(i) + "," + Y(a)).join(" ")}"/>
+   <circle cx="${X(T - 1)}" cy="${Y(v[T - 1])}" r="5" fill="#3d4fd1"/><text x="${P}" y="${H - 2}" font-size="11" fill="#5d6b7a">${monthLab(B)}</text><text x="${W - P}" y="${H - 2}" font-size="11" fill="#5d6b7a" text-anchor="end">${monthLab(NN - 1)}</text>
+   <text x="${P}" y="12" font-size="11" fill="#5d6b7a">high ${o.unit(hi)}</text><text x="${W - P}" y="12" font-size="11" fill="#5d6b7a" text-anchor="end">low ${o.unit(lo)}</text></svg>`;
+}
+function evid(x) { return `r = ${x.r.toFixed(2)}, ${x.lag ? x.lag + "-month lead" : "same month"}, n = ${R().n}`; }
+function moversText() { const o = O(), r = R(), m = [...r.contrib].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3);
+  return m.map(c => `${c.p.k.n} (${sg(c.v, o.unit)}, ${ch(c.p.k) >= 0 ? "up " : "down "}${Math.abs(ch(c.p.k)).toFixed(1)}%)`).join(", "); }
+function warnList() { const o = O(); return R().warn.filter(w => Math.abs(w.v) > Math.abs(R().dyLast) * .1 || Math.abs(w.v) > o.sc * .15).sort((a, b) => a.v - b.v); }
+function brief() {
+  const o = O(), r = R(), y = o.y, c = (y[NN - 1] - y[NN - 2]) / y[NN - 2] * 100, top = drv()[0] || r.rows[0], w = warnList(), bad = w.filter(x => x.v < 0)[0], ms = mis().slice(0, 3);
+  const items = [];
+  items.push([`${o.key} ${c >= 0 ? "rose" : "fell"} ${Math.abs(c).toFixed(1)}% to ${o.unit(y[NN - 1])}. The main movers were ${moversText()}.`, `Top drivers explain ${Math.round(r.r2 * 100)}% of month-to-month swings`]);
+  items.push([`The strongest link is ${top.k.n} (${top.k.d}), which ${top.r > 0 ? "moves with" : "moves against"} ${o.key.toLowerCase()}${top.lag ? ` and leads it by ${top.lag} month${top.lag > 1 ? "s" : ""}` : ""}.`, evid(top)]);
+  if (bad) items.push([`Early warning: ${bad.p.k.n} ${ch(bad.p.k) >= 0 ? "rose" : "fell"} ${Math.abs(ch(bad.p.k)).toFixed(1)}% this month. With a ${bad.p.lag}-month lead, that points to about ${sg(bad.v, o.unit)} for ${o.key.toLowerCase()} next month. ${REC[bad.p.k.n] || ""}`, evid(bad.p)]);
+  else if (w[0]) items.push([`Early signals are positive. ${w[w.length - 1].p.k.n} points to about ${sg(w[w.length - 1].v, o.unit)} next month.`, evid(w[w.length - 1].p)]);
+  if (ms.length) items.push([`${ms.map(m => m.k.n).join(", ")} track ${o.key.toLowerCase()} closely on levels (r from ${Math.min(...ms.map(m => m.rl)).toFixed(2)} to ${Math.max(...ms.map(m => m.rl)).toFixed(2)}) but their monthly changes show no link. They simply rise over time, so treat them as context, not drivers.`, "Level correlation is not evidence of cause"]);
+  $("brief").innerHTML = items.map(([t, e]) => `<div class="ins">${t}<br><span class="ev">${e}</span></div>`).join("");
+}
+function contrib() {
+  const o = O(), r = R(), parts = [...r.contrib.map(c => [c.p.k.n, c.v]), ["Underlying trend", r.trend], ["Unexplained", r.resid]];
+  const mx = Math.max(...parts.map(p => Math.abs(p[1])));
+  $("contrib").innerHTML = parts.map(([n, v]) => `<div class="cb"><span>${n}</span><span class="t"><i style="${v >= 0 ? "left:50%" : "right:50%"};width:${Math.abs(v) / mx * 50}%;background:${v >= 0 ? "#1f8f7e" : "#d9363e"}"></i></span><b class="${v >= 0 ? "up" : "down"}">${sg(v, o.unit)}</b></div>`).join("") +
+    `<p class="sm">Total change: <b>${sg(r.dyLast, o.unit)}</b>. Bars add up to the total.</p>`;
+}
+function chips() { $("chips").innerHTML = ["All", "Driver", "Possible", "Misleading", "No clear link"].map(k => `<button aria-pressed="${k === flt}" data-k="${k}">${k}${k === "All" ? "" : " (" + R().rows.filter(x => x.st === k).length + ")"}</button>`).join(""); }
+const PILL = {"Driver": ["p-up", "Real driver"], "Possible": ["p-hold", "Possible"], "Misleading": ["p-down", "Misleading: trend only"], "No clear link": ["p-info", "No clear link"]};
+function rows() {
+  $("rows").innerHTML = R().rows.filter(x => flt === "All" || x.st === flt).map(x => `<tr><td>${x.k.n}</td><td>${x.k.d}</td>
+   <td><span class="bar"><i style="width:${Math.abs(x.r) * 100}%"></i></span>${Math.abs(x.r).toFixed(2)}</td><td class="${x.r >= 0 ? "up" : "down"}">${x.r >= 0 ? "Helps" : "Hurts"}</td>
+   <td>${x.lag ? x.lag + " mo ahead" : "same month"}</td><td>${x.rl.toFixed(2)}</td><td><span class="pill ${PILL[x.st][0]}">${PILL[x.st][1]}</span></td></tr>`).join("");
+}
+const QS = [
+ o => `Why did ${o.key.toLowerCase()} change last month?`, () => "Which KPIs should the board watch?", () => "Which KPIs can we stop reporting?", () => "What is the early warning for next month?", () => "How reliable is this analysis?"];
+function answer(i) {
+  const o = O(), r = R(), d = drv(), a = [];
+  if (i === 0) { a.push(`${o.key} changed by ${sg(r.dyLast, o.unit)} last month.`); r.contrib.slice().sort((x, y) => Math.abs(y.v) - Math.abs(x.v)).slice(0, 3).forEach(c => a.push(`${c.p.k.n} (${c.p.k.d}) contributed about ${sg(c.v, o.unit)}, as it ${ch(c.p.k) >= 0 ? "rose" : "fell"} ${Math.abs(ch(c.p.k)).toFixed(1)}%. Evidence: ${evid(c.p)}.`)); a.push(`The underlying trend adds ${sg(r.trend, o.unit)} a month and ${sg(r.resid, o.unit)} is unexplained.`); }
+  if (i === 1) { a.push(`Watch these ${Math.min(5, d.length)} KPIs first. Together they explain ${Math.round(r.r2 * 100)}% of month-to-month movement.`); d.slice(0, 5).forEach(x => a.push(`${x.k.n} (${x.k.d}): ${x.r > 0 ? "higher helps" : "higher hurts"}${x.lag ? ", leads by " + x.lag + " month" + (x.lag > 1 ? "s" : "") : ""}. ${evid(x)}.`)); }
+  if (i === 2) { const s = R().rows.filter(x => x.st === "Misleading" || x.st === "No clear link"); a.push(`${s.length} of ${KPI.length} KPIs show no usable link to ${o.key.toLowerCase()}. Move them off the executive page and keep them in department reports.`); a.push(s.map(x => x.k.n).join(", ") + "."); const m = mis(); if (m.length) a.push(`Take extra care with ${m.map(x => x.k.n).join(", ")}: they look important because they rise with ${o.key.toLowerCase()}, but their changes do not match.`); }
+  if (i === 3) { const w = warnList(); if (!w.length) a.push("No leading KPI shows a strong signal for next month."); else w.forEach(x => a.push(`${x.p.k.n} ${ch(x.p.k) >= 0 ? "rose" : "fell"} ${Math.abs(ch(x.p.k)).toFixed(1)}% this month. At a ${x.p.lag}-month lead, that suggests ${sg(x.v, o.unit)} next month. ${x.v < 0 ? (REC[x.p.k.n] || "") : ""}`)); }
+  if (i === 4) { a.push(`The analysis uses ${r.n} monthly changes. A correlation larger than about ${(2 / Math.sqrt(r.n)).toFixed(2)} in size is unlikely to be chance, and the driver cut-off here is a stricter 0.5 because many KPIs are tested. The top drivers explain ${Math.round(r.r2 * 100)}% of the swings, so some movement is still unexplained.`); a.push("This is correlation, not proof of cause. Before acting on a driver, confirm it with a test, such as a controlled change in one region or segment."); a.push("The data on this page is synthetic. With real data, the same steps would run on your KPI warehouse each month."); }
+  $("ans").innerHTML = a.map(t => `<p>${t}</p>`).join("");
+}
+function qs() { $("q").innerHTML = QS.map((f, i) => `<button aria-pressed="${i === qi}" data-i="${i}">${f(O())}</button>`).join(""); }
+function all() { tabs(); summary(); brief(); contrib(); chips(); rows(); qs(); answer(qi < 0 ? 0 : qi); if (qi < 0) qi = 0; qs(); }
+$("tabs").onclick = e => { const i = e.target.dataset.i; if (i !== undefined) { oi = +i; flt = "All"; all(); } };
+$("chips").onclick = e => { const k = e.target.dataset.k; if (k) { flt = k; chips(); rows(); } };
+$("q").onclick = e => { const i = e.target.dataset.i; if (i !== undefined) { qi = +i; qs(); answer(qi); } };
+all();
+</script>
+</body>
+</html>
